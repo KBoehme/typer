@@ -145,8 +145,7 @@ class Typer:
             cls = click.Command
 
         def decorator(f: CommandFunctionType) -> CommandFunctionType:
-            self.registered_commands.append(
-                CommandInfo(
+            new_command = CommandInfo(
                     name=name,
                     cls=cls,
                     context_settings=context_settings,
@@ -159,8 +158,9 @@ class Typer:
                     no_args_is_help=no_args_is_help,
                     hidden=hidden,
                     deprecated=deprecated,
+                    myfunc=f,
                 )
-            )
+            self.registered_commands.append(new_command)
             return f
 
         return decorator
