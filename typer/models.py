@@ -96,7 +96,6 @@ class CommandInfo:
         no_args_is_help: bool = False,
         hidden: bool = False,
         deprecated: bool = False,
-        myfunc: Callable = None,
     ):
         self.name = name
         self.cls = cls
@@ -110,7 +109,7 @@ class CommandInfo:
         self.no_args_is_help = no_args_is_help
         self.hidden = hidden
         self.deprecated = deprecated
-        self.myfunc = myfunc
+
 
 class TyperInfo:
     def __init__(
