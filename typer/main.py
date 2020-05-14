@@ -1,4 +1,5 @@
 import inspect
+import json
 from datetime import datetime
 from enum import Enum
 from functools import update_wrapper
@@ -82,6 +83,7 @@ class Typer:
         self.registered_groups: List[TyperInfo] = []
         self.registered_commands: List[CommandInfo] = []
         self.registered_callback: Optional[TyperInfo] = None
+        self.introspect_init = False
 
     def callback(
         self,
@@ -126,6 +128,18 @@ class Typer:
 
         return decorator
 
+    def introspect(self):
+        output = {}
+        for command in self.registered_commands:
+            func_sig = inspect.signature(command.callback)
+            inputs = {}
+            for k, v in func_sig.parameters.items():
+                inputs[v.name] = v.annotation.__name__
+            output[command.callback.__name__] = {"output": [func_sig.return_annotation.__name__], "input": inputs}
+        final_output = json.dumps(output, indent=4, sort_keys=True)
+        print(final_output)
+        return final_output
+
     def command(
         self,
         name: Optional[str] = None,
@@ -143,6 +157,24 @@ class Typer:
     ) -> Callable[[CommandFunctionType], CommandFunctionType]:
         if cls is None:
             cls = click.Command
+
+        if not self.introspect_init:
+            self.registered_commands.append(CommandInfo(
+                    name=name,
+                    cls=cls,
+                    context_settings=context_settings,
+                    callback=self.introspect,
+                    help=help,
+                    epilog=epilog,
+                    short_help=short_help,
+                    options_metavar=options_metavar,
+                    add_help_option=add_help_option,
+                    no_args_is_help=no_args_is_help,
+                    hidden=hidden,
+                    deprecated=deprecated,
+                )
+            )
+            self.introspect_init = True
 
         def decorator(f: CommandFunctionType) -> CommandFunctionType:
             self.registered_commands.append(
