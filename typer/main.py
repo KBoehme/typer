@@ -135,7 +135,10 @@ class Typer:
             inputs = {}
             for k, v in func_sig.parameters.items():
                 inputs[v.name] = v.annotation.__name__
-            output[command.callback.__name__] = {"output": [func_sig.return_annotation.__name__], "input": inputs}
+            output[command.callback.__name__.replace("_", "-")] = {
+                "output": [func_sig.return_annotation.__name__],
+                "input": inputs
+            }
         final_output = json.dumps(output, indent=4, sort_keys=True)
         print(final_output)
         return final_output
